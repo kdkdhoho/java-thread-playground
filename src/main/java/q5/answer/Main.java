@@ -25,7 +25,7 @@ public class Main {
         Result result = new Result(2);
         Reader reader1 = new Reader(0, "reader0", file1, result, lock, readerCondition, printerCondition);
         Reader reader2 = new Reader(1, "reader1", file2, result, lock, readerCondition, printerCondition);
-        Printer printer = new Printer("printer", result, lock, readerCondition);
+        Printer printer = new Printer("printer", result, lock, readerCondition, printerCondition);
         reader1.start();
         reader2.start();
         printer.start();

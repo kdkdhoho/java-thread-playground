@@ -1,11 +1,13 @@
 package q5.answer;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class Result {
 
     private final int targetEndCount;
-    private final StringBuilder builder = new StringBuilder();
+    private final StringBuffer buffer = new StringBuffer();
 
-    private int currentEndCount = 0;
+    private final AtomicInteger currentEndCount = new AtomicInteger(0);
 
     Result(int targetEndCount) {
         this.targetEndCount = targetEndCount;
@@ -13,21 +15,21 @@ public class Result {
 
     public void add(String value) {
         if (value.isBlank()) {
-            builder.append(System.lineSeparator());
+            buffer.append(System.lineSeparator());
         } else {
-            builder.append(value).append(" ");
+            buffer.append(value).append(" ");
         }
     }
 
     public void signalEnd() {
-        currentEndCount++;
+        currentEndCount.getAndIncrement();
     }
 
     public boolean canPrint() {
-        return currentEndCount == targetEndCount;
+        return currentEndCount.get() == targetEndCount;
     }
 
     public void print() {
-        System.out.println(builder);
+        System.out.println(buffer);
     }
 }

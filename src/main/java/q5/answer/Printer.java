@@ -9,28 +9,35 @@ public class Printer implements Runnable {
     private final Result result;
     private final Lock lock;
     private final Condition readerCondition;
+    private final Condition printerCondition;
 
-    public Printer(String name, Result result, Lock lock, Condition readerCondition) {
+    public Printer(String name, Result result, Lock lock, Condition readerCondition, Condition printerCondition) {
         this.thread = new Thread(this, name);
         this.result = result;
         this.lock = lock;
         this.readerCondition = readerCondition;
+        this.printerCondition = printerCondition;
     }
 
     @Override
     public void run() {
         while (true) {
             try {
-                lock.lock();
+                try {
+                    lock.lock();
 
-                if (!result.canPrint()) { // 출력할 수 없다면
-                    readerCondition.signal(); // reader 쓰레드 깨우기
-                } else {
-                    result.print(); // 출력
-                    return; // 쓰레드 종료
+                    if (!result.canPrint()) { // 출력할 수 없다면
+                        readerCondition.signal(); // reader 쓰레드 깨우기
+                        printerCondition.await(); // PrinterCondition에서 대기
+                    } else {
+                        result.print(); // 출력
+                        return; // 쓰레드 작업 종료
+                    }
+                } finally {
+                    lock.unlock(); // Lock 반환
                 }
-            } finally {
-                lock.unlock();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
